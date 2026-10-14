@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PayPay Sound module</string>
+    <string name="xposed_description">PayPay の決済完了音とチャットのメッセージ音を、自分で選んだ音声ファイルに差し替えます。</string>
+    <string name="diagnostics_title">診断</string>
+
+    <!-- LSPosed のスコープの既定値。本アプリ自身も入れているのは、
+         モジュールが実際にロードされているかをアプリから判定するため。 -->
+    <string-array name="xposed_scope">
+        <item>jp.ne.paypay.android.app</item>
+        <item>com.paypaysound.hook</item>
+    </string-array>
+</resources>
