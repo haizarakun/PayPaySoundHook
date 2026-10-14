@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  配色。このアプリは端末の設定に関係なく暗い見た目で統一する。
+  深夜に支払って画面を開くことが多いため。
+-->
+<resources>
+    <!-- アイコンの背景色。好きな色に変えてかまわない。 -->
+    <color name="ic_launcher_background">#E60012</color>
+
+    <color name="screen">#000000</color>
+    <color name="surface">#1C1C1E</color>
+    <color name="surface_raised">#2C2C2E</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#9A9AA0</color>
+    <color name="accent">#F5002E</color>
+    <color name="accent_text">#FFFFFF</color>
+    <color name="ok">#4ED07A</color>
+</resources>
