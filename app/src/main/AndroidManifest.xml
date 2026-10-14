@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- 更新の確認とダウンロードに使う。 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- root が使えない端末で、OS 標準のインストーラに渡すために使う。 -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <!-- Android 11 以降でも PayPay のバージョンを診断に出せるようにする。 -->
+    <queries>
+        <package android:name="jp.ne.paypay.android.app" />
+    </queries>
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@android:style/Theme.Material">
+
+        <!-- LSPosed にモジュールとして認識させるための宣言。 -->
+        <meta-data
+            android:name="xposedmodule"
+            android:value="true" />
+        <meta-data
+            android:name="xposeddescription"
+            android:value="@string/xposed_description" />
+        <meta-data
+            android:name="xposedminversion"
+            android:value="82" />
+        <meta-data
+            android:name="xposedscope"
+            android:resource="@array/xposed_scope" />
+
+        <!-- 画面の中に見出しを置いてあるので、上のタイトル帯は出さない。
+             帯があると見出しが二重になり、説明文がその裏に隠れる。 -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.Material.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".diag.DiagnosticsActivity"
+            android:exported="false"
+            android:label="@string/diagnostics_title" />
+
+    </application>
+
+</manifest>
