@@ -27,8 +27,12 @@ import java.io.File;
  * 判定は GitHub の最新リリースのタグ名と versionName の比較で行う。
  * タグは versionName と一致させること（versionName 1.01 ならタグは v1.01）。
  *
- * ダイアログは1つだけ使い回す。更新内容を読ませる状態から、そのまま
- * 進捗表示に切り替わるので、画面が入れ替わって現在地を見失うことがない。
+ * ダイアログは1つだけ使い回す。更新内容を読ませる状態から、ダウンロード、
+ * インストールの確認まで同じ枠の中で進むので、画面が入れ替わって現在地を
+ * 見失うことがない。
+ *
+ * インストールの直前で必ず一度手を止めて、入れ替え方を選ばせる。root を使うと
+ * Android のインストール画面を通らずに入れ替わるため、黙って実行しない。
  */
 public final class ForceUpdateGate {
 
@@ -84,7 +88,10 @@ public final class ForceUpdateGate {
 
     /**
      * 1回分の更新のやりとり。
-     * 確認 → ダウンロード → 署名の照合 → インストール、を同じダイアログの中で進める。
+     * 更新内容の確認 → ダウンロード → 署名の照合 → 入れ替え方の確認 → インストール。
+     *
+     * 主ボタンの役目は段階ごとに変わるので、押されたときの動きを
+     * {@link #primaryAction} に差し替えていく。
      */
     private static final class UpdateFlow {
 
@@ -96,6 +103,9 @@ public final class ForceUpdateGate {
         private TextView notesView;
         private TextView statusView;
         private ProgressBar progressView;
+
+        /** 主ボタンを押したときの動き。段階が進むたびに差し替える。 */
+        private Runnable primaryAction;
 
         UpdateFlow(Activity activity, UpdateInfo info) {
             this.activity = activity;
@@ -113,11 +123,19 @@ public final class ForceUpdateGate {
             notesView.setText(info.notes.isEmpty() ? "更新内容の記載はありません。" : info.notes);
             statusView.setText("この更新は必須です。更新するまでアプリは使用できません。");
 
+            primaryAction = new Runnable() {
+                @Override
+                public void run() {
+                    download();
+                }
+            };
+
             dialog = new AlertDialog.Builder(activity)
                     .setTitle("アップデート")
                     .setView(content)
                     .setCancelable(false)
                     .setPositiveButton("今すぐ更新", null)
+                    .setNeutralButton("Android の画面で入れる", null)
                     .setNegativeButton("終了", null)
                     .create();
             blockBackKey(dialog);
@@ -129,7 +147,7 @@ public final class ForceUpdateGate {
                     positiveButton().setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            download();
+                            primaryAction.run();
                         }
                     });
                     negativeButton().setOnClickListener(new View.OnClickListener() {
@@ -139,9 +157,21 @@ public final class ForceUpdateGate {
                             activity.finish();
                         }
                     });
+                    // 入れ替え方を選ぶ段階になるまでは出さない。
+                    neutralButton().setVisibility(View.GONE);
+                    neutralButton().setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            installWithSystemInstaller(downloadedFile());
+                        }
+                    });
                 }
             });
             dialog.show();
+        }
+
+        private File downloadedFile() {
+            return new File(activity.getCacheDir(), DOWNLOAD_FILE_NAME);
         }
 
         private void download() {
@@ -150,17 +180,16 @@ public final class ForceUpdateGate {
             progressView.setProgress(0);
             progressView.setVisibility(View.VISIBLE);
 
-            File destination = new File(activity.getCacheDir(), DOWNLOAD_FILE_NAME);
-            UpdateChecker.downloadAsync(info.apkUrl, destination, new UpdateChecker.DownloadCallback() {
+            UpdateChecker.downloadAsync(info.apkUrl, downloadedFile(), new UpdateChecker.DownloadCallback() {
                 @Override
                 public void onProgress(int percent) {
                     progressView.setProgress(percent);
-                    statusView.setText("ダウンロード中  " + percent + "%");
+                    statusView.setText("ダウンロード中 " + percent + "%");
                 }
 
                 @Override
                 public void onSuccess(File apkFile) {
-                    install(apkFile);
+                    verify(apkFile);
                 }
 
                 @Override
@@ -171,7 +200,8 @@ public final class ForceUpdateGate {
             });
         }
 
-        private void install(File apkFile) {
+        /** 落ちてきた APK が自分と同じ鍵で署名されているかを確かめる。 */
+        private void verify(final File apkFile) {
             progressView.setIndeterminate(true);
             statusView.setText("署名を確認しています...");
 
@@ -182,17 +212,54 @@ public final class ForceUpdateGate {
                 showRetry("ダウンロードした APK の署名が一致しませんでした。");
                 return;
             }
+            askHowToInstall(apkFile);
+        }
 
+        /**
+         * インストールの直前で一度止めて、入れ替え方を選ばせる。
+         * root を使う側は Android の確認画面を通らないので、押す前にそう伝える。
+         */
+        private void askHowToInstall(final File apkFile) {
+            progressView.setIndeterminate(false);
+            progressView.setVisibility(View.GONE);
+            statusView.setText("ダウンロードが完了しました。\n"
+                    + "「インストール」を押すと、root 権限で Android の確認画面を通さずに入れ替えます。\n"
+                    + "確認画面を見てから入れたい場合は「Android の画面で入れる」を選んでください。");
+
+            primaryAction = new Runnable() {
+                @Override
+                public void run() {
+                    installWithRoot(apkFile);
+                }
+            };
+            positiveButton().setText("インストール");
+            neutralButton().setVisibility(View.VISIBLE);
+            setButtonsEnabled(true);
+        }
+
+        /** root で無操作インストール。成功するとこのプロセスはその場で終了する。 */
+        private void installWithRoot(File apkFile) {
+            setButtonsEnabled(false);
+            neutralButton().setVisibility(View.GONE);
+            progressView.setIndeterminate(true);
+            progressView.setVisibility(View.VISIBLE);
             statusView.setText("インストールしています...");
-            // root が使えれば無操作で入れ替わる（成功するとこのプロセスはその場で終了する）。
+
             if (ApkInstaller.installWithRoot(apkFile)) {
                 return;
             }
+            DiagnosticsLog.i("root が使えないため、OS のインストーラに渡します");
+            installWithSystemInstaller(apkFile);
+        }
+
+        /** OS 標準のインストーラに渡す。確認画面はそちらが出す。 */
+        private void installWithSystemInstaller(File apkFile) {
+            setButtonsEnabled(false);
+            neutralButton().setVisibility(View.GONE);
             try {
-                DiagnosticsLog.i("root が使えないため、OS のインストーラに渡します");
                 ApkInstaller.installWithPackageInstaller(activity, apkFile);
-                statusView.setText("インストーラの画面で続けてください。");
                 progressView.setVisibility(View.GONE);
+                statusView.setText("インストーラの画面で続けてください。");
             } catch (Exception error) {
                 DiagnosticsLog.w("インストールに失敗しました", error);
                 showRetry("インストールに失敗しました。");
@@ -203,13 +270,21 @@ public final class ForceUpdateGate {
             progressView.setIndeterminate(false);
             progressView.setVisibility(View.GONE);
             statusView.setText(reason);
+            primaryAction = new Runnable() {
+                @Override
+                public void run() {
+                    download();
+                }
+            };
             positiveButton().setText("再試行");
+            neutralButton().setVisibility(View.GONE);
             setButtonsEnabled(true);
         }
 
         private void setButtonsEnabled(boolean enabled) {
             positiveButton().setEnabled(enabled);
             negativeButton().setEnabled(enabled);
+            neutralButton().setEnabled(enabled);
         }
 
         private Button positiveButton() {
@@ -218,6 +293,10 @@ public final class ForceUpdateGate {
 
         private Button negativeButton() {
             return dialog.getButton(AlertDialog.BUTTON_NEGATIVE);
+        }
+
+        private Button neutralButton() {
+            return dialog.getButton(AlertDialog.BUTTON_NEUTRAL);
         }
 
         /** 戻るキーでダイアログを逃げられないようにする。 */
