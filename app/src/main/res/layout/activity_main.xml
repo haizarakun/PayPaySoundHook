@@ -36,7 +36,7 @@ fitsSystemWindows を立てているのは、上のタイトル帯を消した�
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="音声ファイルを選択すると即座に反映\n対応フォーマット（MP3 / WAV / OGG / AAC(M4A) / FLAC）\n適応後は PayPay を再起動してください"
+            android:text="音声ファイルを選ぶだけで差し替え\n対応フォーマット（MP3 / WAV / OGG / AAC(M4A) / FLAC）\n選んだあとは PayPay を再起動してください"
             android:textColor="@color/text_secondary"
             android:textSize="12sp"
             android:lineSpacingExtra="3dp" />
