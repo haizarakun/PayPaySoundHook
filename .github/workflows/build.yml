@@ -1,8 +1,8 @@
 # APK を GitHub 側でビルドする。
 # Actions タブから手動で走らせると、成果物がアーティファクトとして落とせる。
 #
-# keystore.properties を置いていないので、ここでできる APK はデバッグ鍵署名。
-# 配布用にするなら、落とした APK を手元で apksigner で署名し直すこと。
+# ここでできる APK は未署名。配布するときは手元で apksigner で署名し直すこと。
+# 取り違えないよう、ファイル名に -unsigned を付けて出す。
 name: Build APK
 
 on:
@@ -35,8 +35,18 @@ jobs:
       - name: Build release APK
         run: gradle assembleRelease --no-daemon --stacktrace
 
+      # app/build.gradle の versionName をそのままファイル名に使う。
+      - name: Name the APK
+        run: |
+          VERSION=$(sed -n "s/.*versionName *'\(.*\)'.*/\1/p" app/build.gradle | head -n 1)
+          cd app/build/outputs/apk/release
+          for f in *.apk; do
+            mv "$f" "PayPaySoundHook-v${VERSION}-unsigned.apk"
+          done
+          ls -l
+
       - uses: actions/upload-artifact@v4
         with:
-          name: PayPaySoundHook-apk
+          name: PayPaySoundHook-apk-unsigned
           path: app/build/outputs/apk/release/*.apk
           if-no-files-found: error
