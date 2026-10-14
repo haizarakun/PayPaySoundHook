@@ -1,0 +1,42 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.paypaysound.hook'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.paypaysound.hook'
+        minSdk 27
+        targetSdk 35
+
+        // バージョン名は GitHub のリリースのタグ名と一致させること（1.00 ならタグは v1.00）。
+        // アプリ内のアップデータがタグ名と versionName を比べて更新を判断する。
+        versionCode 100
+        versionName '1.00'
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // Xposed の API はフレームワーク側が実行時に用意するので、APK には入れない。
+    compileOnly 'de.robv.android.xposed:api:82'
+}
+
+// 配布用の署名はビルドに含めない。ここで出る APK はデバッグ鍵のままなので、
+// 配布するときは手元で apksigner を使って署名し直す。
