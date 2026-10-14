@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- サンプルのアイコン（音符）。好きなデザインに差し替えてかまわない。 -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M64,30 L64,60.5 a10,8 0 1 0 6,7.3 L70,41 L78,43 L78,34 Z" />
+
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M34,46 L34,70.5 a9,7.2 0 1 0 5.4,6.6 L39.4,52 L47,53.8 L47,45.8 Z" />
+
+</vector>
