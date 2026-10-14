@@ -63,7 +63,7 @@ Android 11 以降のパッケージ可視性制限により、本モジュール
 
 ## セットアップ
 
-1. Android Studio でビルド（または `./gradlew assembleRelease`）
+1. Android Studio でビルド（または Gradle 8.9 以上で `gradle assembleRelease`。Wrapper は置いていない）
 2. 署名し直してから APK をインストール（下記「署名」）
 3. LSPosed Manager でモジュールを有効化し、スコープに `jp.ne.paypay.android.app` と**本アプリ自身**を追加
 4. Magisk アプリの「Superuser」タブで `jp.ne.paypay.android.app` に root 権限を許可
@@ -123,7 +123,7 @@ root が使えない端末では、「インストール」を押しても自動
 2. 手元で `apksigner` を使って配布用の鍵で署名し直す（Actions が吐いた APK をそのまま上げないこと）
 3. GitHub で新しいリリースを作り、タグを `vX.XX` にする
 4. APK を1つ添付する（ファイル名は自由。添付の中から最初の .apk を拾う）
-5. リリース本文がそのまま更新内容としてダイアログに出る
+5. リリース本文がそのまま更新内容としてダイアログに出る（`CHANGELOG.md` の該当バージョン以下を貼る）
 
 アプリが見にいく先は次の固定 URL で、GitHub 側が最新リリースへ解決する。
 
@@ -147,7 +147,7 @@ https://api.github.com/repos/haizarakun/PayPaySoundHook/releases/latest
 
 ## ライセンス
 
-個人利用のみを認める独自ライセンス。オープンソースではない。再配布・販売・改変版の公開は許可していない。詳細は [LICENSE.md](LICENSE.md)。
+個人利用のみを認める独自ライセンス。オープンソースではない。再配布・販売・改変版の公開は許可していない。詳細は [LICENSE](LICENSE)。
 
 ## PayPay 運営の方へ
 
