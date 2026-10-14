@@ -4,11 +4,11 @@
 .gradle/
 local.properties
 
-# 署名鍵関連（絶対にコミットしない）
-keystore.properties
+# 設定ファイル（端末や環境ごとに違うもの）
+*.properties.local
+/keys/
 *.keystore
 *.jks
-/keys/
 
 # IDE / OS
 .idea/
