@@ -1,0 +1,16 @@
+# ビルド成果物
+/build/
+/app/build/
+.gradle/
+local.properties
+
+# 署名鍵関連（絶対にコミットしない）
+keystore.properties
+*.keystore
+*.jks
+/keys/
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store
