@@ -1,17 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- サンプルのアイコン（音符）。好きなデザインに差し替えてかまわない。 -->
+<!--
+アイコンの前景。音符と音の広がりで「音を差し替えるもの」だと分かるようにしている。
+安全領域（中央 72x72）に収まる位置と大きさ。
+-->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M64,30 L64,60.5 a10,8 0 1 0 6,7.3 L70,41 L78,43 L78,34 Z" />
+    <!-- 音符の玉。少し傾けて音符らしく見せる。 -->
+    <group
+        android:pivotX="40"
+        android:pivotY="70"
+        android:rotation="-20">
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M27,70 a13,10 0 1,0 26,0 a13,10 0 1,0 -26,0 z" />
+    </group>
 
+    <!-- 音符の棒と旗。 -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M34,46 L34,70.5 a9,7.2 0 1 0 5.4,6.6 L39.4,52 L47,53.8 L47,45.8 Z" />
+        android:pathData="M49,30 h6 v40 h-6 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M55,28 c11,3 18,11 15,22 c-1,-12 -6,-15 -15,-17 z" />
+
+    <!-- 音の広がり。2本で十分伝わるので増やさない。 -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M76,45 q7,9 0,18" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M85,38 q11,16 0,32" />
 
 </vector>
